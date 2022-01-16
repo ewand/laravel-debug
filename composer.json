@@ -20,6 +20,16 @@
     "config": {
         "preferred-install": "dist"
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelDebug\\LaravelDebugServiceProvider"
+            ],
+            "aliases": {
+                "LaravelDebug" : "LaravelDebug\\Facades\\LaravelDebug"
+            }
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
