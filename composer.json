@@ -1,0 +1,25 @@
+{
+    "name": "ewand/laravel-debug",
+    "description": "Debugging and monitoring for Laravel applications",
+    "keywords": ["monitoring", "php", "debug", "laravel"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ewan Duckworth",
+            "email": "ewan.duckworth@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelDebug\\": "src/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
