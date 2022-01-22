@@ -6,15 +6,18 @@ use Illuminate\Log\Events\MessageLogged;
 
 class LaravelDebug {
 
-    public $enabled = true;
+    private $enabled = true;
+    private $transaction;
     private $start;
     private $name;
     private $user;
+    private $results = [];
 
     public function __construct()
     {
         if (!config('laraveldebug.enabled')) {
             $this->enabled = false;
+            $this->transaction = uniqid();
         }
     }
 
@@ -38,15 +41,17 @@ class LaravelDebug {
 
     public function terminate($request, $response) {
         if ($this->enabled) {
-            $result = base64_encode(json_encode([
+            $this->results[] = [
+                'transaction' => $this->transaction,
+                'type' => 'response',
                 'name' => $this->name,
                 'duration' => round((microtime(true) - $this->start)*1000, 2), // milliseconds
                 'user' => $this->user,
                 'context' => [],
                 'body' => $request->request->all(),
                 'status_code' => $response->getStatusCode(),
-            ]));
-            $this->sendResult($result);
+            ];
+            $this->sendResult(base64_encode(json_encode($this->results)));
         }
     }
 
@@ -54,7 +59,7 @@ class LaravelDebug {
         $curl = "curl -X POST --ipv4 --max-time 5";
         $curl .= " --header \"Content-Type: application/json\"";
         $curl .= " --header \"Accept: application/json\"";
-        $curl .= " --header \"LaravelDebugClient: ".config("laraveldebug.client")."\"";
+        $curl .= " --header \"X-LARAVEL-DEBUG-CLIENT: ".config("laraveldebug.client")."\"";
         $curl .= " --data {$data} {".config("laraveldebug.url")."}";
         $cmd = "({$curl} > /dev/null 2>&1";
         $cmd .= ')&';
@@ -63,21 +68,29 @@ class LaravelDebug {
 
     public function setupErrorHandling() {
         if (class_exists(MessageLogged::class)) {
-            $this->app['events']->listen(MessageLogged::class, function (MessageLogged $log) {
+            app()['events']->listen(MessageLogged::class, function (MessageLogged $log) {
                 if ($log->level == 'error') {
-                    $result = base64_encode(json_encode([
+                    $this->results[] = [
+                        'transaction' => $this->transaction,
+                        'type' => 'error',
+                        'error' => $log->context['exception']->getMessage(),
+                        'line' => $log->context['exception']->getLine(),
+                        'file' => $log->context['exception']->getFile(),
                         'name' => $this->name,
                         'duration' => round((microtime(true) - $this->start)*1000, 2), // milliseconds
                         'user' => $this->user,
                         'context' => [],
-                    ]));
-                    $this->sendResult($result);
+                    ];
                 }
             });
         } else {
-            $this->app['events']->listen('events.*', function ($level, $message, $context) {
-                \Log::info($message);
-                \Log::info($context);
+            app()['events']->listen('events.*', function ($level, $message, $context) {
+                $this->results[] = [
+                    'transaction' => $this->transaction,
+                    'type' => 'event',
+                    $level,
+                    $message
+                ];
             });
         }
     }

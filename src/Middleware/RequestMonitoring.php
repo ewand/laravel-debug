@@ -4,19 +4,19 @@
 namespace LaravelDebug\Middleware;
 
 use Closure;
-use Symfony\Component\HttpKernel\TerminableInterface;
+use LaravelDebug\LaravelDebug;
 
-class RequestMonitoring implements TerminableInterface
+class RequestMonitoring
 {
 
     public function handle($request, Closure $next)
     {
-        app('laraveldebug')->setRequest($request);
+        app('inspector')->setRequest($request);
         return $next($request);
     }
 
     public function terminate($request, $response)
     {
-        app('laraveldebug')->terminate($request, $response);
+        app('inspector')->terminate($request, $response);
     }
 }
