@@ -18,9 +18,10 @@ class LaravelDebugServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/config/laraveldebug.php', 'laraveldebug');
         $this->app->singleton(RequestMonitoring::class);
         $this->app->singleton('inspector', function ($app) {
+            $ld = new LaravelDebug();
+            $ld->setupErrorHandling();
             return new LaravelDebug();
         });
-        LaravelDebug::setupErrorHandling();
     }
 
 }
