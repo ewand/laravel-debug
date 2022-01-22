@@ -11,12 +11,12 @@ class RequestMonitoring implements TerminableInterface
 
     public function handle($request, Closure $next)
     {
-        \LaravelDebug::setRequest($request);
+        app('laraveldebug')->setRequest($request);
         return $next($request);
     }
 
     public function terminate($request, $response)
     {
-        \LaravelDebug::terminate($request, $response);
+        app('laraveldebug')->terminate($request, $response);
     }
 }

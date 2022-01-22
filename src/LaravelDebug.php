@@ -13,7 +13,7 @@ class LaravelDebug {
 
     public function __construct()
     {
-        if (!config('laravel-debug.enabled')) {
+        if (!config('laraveldebug.enabled')) {
             $this->enabled = false;
         }
     }
